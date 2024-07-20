@@ -5,7 +5,10 @@ use crossterm::{
     event::{self, Event, KeyCode, KeyEvent},
     execute, queue,
     style::{Color, ContentStyle, Print, PrintStyledContent, StyledContent},
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{
+        self, BeginSynchronizedUpdate, EndSynchronizedUpdate, EnterAlternateScreen,
+        LeaveAlternateScreen,
+    },
     ExecutableCommand,
 };
 
@@ -55,7 +58,7 @@ fn main() -> std::io::Result<()> {
 
         match event::read()? {
             Event::Key(KeyEvent {
-                code: KeyCode::Right | KeyCode::Char('d'),
+                code: KeyCode::Right | KeyCode::Char('d') | KeyCode::Char('l'),
                 ..
             }) if x < cols - 1 => {
                 if maze.cells[y as usize][x as usize + 1] != Cell::Wall {
@@ -65,7 +68,7 @@ fn main() -> std::io::Result<()> {
             }
 
             Event::Key(KeyEvent {
-                code: KeyCode::Up | KeyCode::Char('w'),
+                code: KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('k'),
                 ..
             }) if y > 0 => {
                 if maze.cells[y as usize - 1][x as usize] != Cell::Wall {
@@ -75,7 +78,7 @@ fn main() -> std::io::Result<()> {
             }
 
             Event::Key(KeyEvent {
-                code: KeyCode::Left | KeyCode::Char('a'),
+                code: KeyCode::Left | KeyCode::Char('a') | KeyCode::Char('h'),
                 ..
             }) if x > 0 => {
                 if maze.cells[y as usize][x as usize - 1] != Cell::Wall {
@@ -85,7 +88,7 @@ fn main() -> std::io::Result<()> {
             }
 
             Event::Key(KeyEvent {
-                code: KeyCode::Down | KeyCode::Char('s'),
+                code: KeyCode::Down | KeyCode::Char('s') | KeyCode::Char('j'),
                 ..
             }) if y < rows - 1 => {
                 if maze.cells[y as usize + 1][x as usize] != Cell::Wall {
@@ -146,6 +149,8 @@ fn render_player(x: u16, y: u16) -> std::io::Result<()> {
 fn render_maze(maze: &Maze) -> std::io::Result<()> {
     let mut stdout = std::io::stdout();
 
+    execute!(stdout, BeginSynchronizedUpdate)?;
+
     for i in 0..maze.width {
         for j in 0..maze.height {
             let right = if i < maze.width - 1 {
@@ -200,6 +205,8 @@ fn render_maze(maze: &Maze) -> std::io::Result<()> {
             queue!(stdout, MoveTo(i as u16, j as u16), Print(symbol))?;
         }
     }
+
+    execute!(stdout, EndSynchronizedUpdate)?;
 
     stdout.flush()?;
 
