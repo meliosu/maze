@@ -229,8 +229,7 @@ impl Maze {
 
         let mut nodes: Vec<Vec<Direction>> = (0..maze_height)
             .map(|_| {
-                let mut row: Vec<Direction> =
-                    (0..maze_width - 1).map(|_| Direction::Left).collect();
+                let mut row = vec![Direction::Left; maze_width - 1];
                 row.insert(0, Direction::Up);
                 row
             })
